@@ -6,7 +6,22 @@ import CharInfo from "../charInfo/CharInfo";
 import decoration from '../../resources/img/vision.png';
 import { Component } from "react";
 
-class App extends Component {
+interface AppState {
+    selectedId: null | number
+}
+
+class App extends Component<any, AppState> {
+    state = {
+        selectedId: null
+    }
+
+    onSelect = (id: number) => {
+        this.setState({
+            selectedId: id
+        })
+
+    }
+
     render() {
         return (
             <div className="app">
@@ -14,8 +29,8 @@ class App extends Component {
                 <main>
                     <RandomChar/>
                     <div className="char__content">
-                        <CharList/>
-                        <CharInfo/>
+                        <CharList onSelect={this.onSelect}/>
+                        <CharInfo selectedId={this.state.selectedId}/>
                     </div>
                     <img className="bg-decoration" src={decoration} alt="vision"/>
                 </main>

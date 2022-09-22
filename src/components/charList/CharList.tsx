@@ -12,7 +12,11 @@ interface CharListState {
     loading: boolean,
 }
 
-class CharList extends Component<any, CharListState> {
+interface CharListProps {
+    onSelect: (id: number) => void;
+}
+
+class CharList extends Component<CharListProps, CharListState> {
     state = {
         characters: [],
         error: false,
@@ -37,7 +41,8 @@ class CharList extends Component<any, CharListState> {
     }
 
     itemView = () => {
-        return this.state.characters.map((item) => {
+        const { onSelect } = this.props;
+        const items = this.state.characters.map((item) => {
             const { name, thumbnail, id } = item;
 
             const img = (thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg")
@@ -45,14 +50,20 @@ class CharList extends Component<any, CharListState> {
                 : <img src={thumbnail} alt={name} className="randomchar__img"/>;
 
             return(
-                <ul className="char__grid">
-                    <li className="char__item" key={id}>
+                    <li className="char__item"
+                        key={id}
+                        onClick={() => onSelect(id)}
+                    >
                         {img}
                         <div className="char__name">{name}</div>
                     </li>
-                </ul>
             )
         });
+        return(
+            <ul className="char__grid">
+                {items}
+            </ul>
+        )
     }
 
     render() {

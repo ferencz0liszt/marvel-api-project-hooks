@@ -1,33 +1,105 @@
 import './charInfo.scss';
-import thor from '../../resources/img/thor.jpeg';
 import {Component} from "react";
+import MarvelService from "../../services/MarvelService";
 
-class CharInfo extends Component {
-    render() {
+interface CharInfoProps {
+    selectedId: any;
+}
+
+interface CharInfoState {
+    character: {
+        name: string | null | undefined,
+        description: string | null | undefined,
+        thumbnail: string | null | undefined,
+        homepage: string | null | undefined,
+        wiki: string | null | undefined,
+    }
+    loading: boolean,
+    error: boolean
+}
+
+class CharInfo extends Component<CharInfoProps, CharInfoState> {
+    state = {
+        character: {
+            name: undefined,
+            description: undefined,
+            thumbnail: undefined,
+            homepage: undefined,
+            wiki: undefined,
+        },
+    loading: true,
+    error: false
+    }
+
+    marvelService = new MarvelService();
+
+    updateCharacter = () => {
+        const { selectedId } = this.props;
+        if (!selectedId) {
+            return;
+        }
+
+        this.marvelService
+            .getCharacter(selectedId)
+            .then(this.onCharacterLoad)
+            .catch(this.onError);
+    }
+
+    onCharacterLoad = (character: any) => {
+        const { name, description, thumbnail, homepage, wiki } = character;
+        this.setState({
+            character: {
+                name,
+                description,
+                thumbnail,
+                homepage,
+                wiki
+            },
+            loading: false
+        })
+    }
+
+    onError = () => {
+        this.setState({
+            loading: false,
+            error: true
+        })
+    }
+
+    viewCharacter = () => {
+        const {character: {name, description, homepage, wiki, thumbnail}} = this.state;
+        const img = (thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg")
+            ? <img src={thumbnail} style={{objectFit: "contain"}} alt={name} className="randomchar__img"/>
+            : <img src={thumbnail} alt="Random character" className="randomchar__img"/>;
+
         return (
             <div className="char__info">
                 <div className="char__basics">
-                    <img src={thor} alt="abyss"/>
+                    {img}
                     <div>
-                        <div className="char__info-name">thor</div>
+                        <div className="char__info-name">{name}</div>
                         <div className="char__btns">
-                            <a href="#" className="button button__main">
-                                <div className="inner">homepage</div>
+                            <a href={homepage} className="button button__main">
+                                <div className="inner">Homepage</div>
                             </a>
-                            <a href="#" className="button button__secondary">
+                            <a href={wiki} className="button button__secondary">
                                 <div className="inner">Wiki</div>
                             </a>
                         </div>
                     </div>
                 </div>
                 <div className="char__descr">
-                    In Norse mythology, Loki is a god or jötunn (or both). Loki is the son of Fárbauti and Laufey, and
-                    the brother of Helblindi and Býleistr. By the jötunn Angrboða, Loki is the father of Hel, the wolf
-                    Fenrir, and the world serpent Jörmungandr. By Sigyn, Loki is the father of Nari and/or Narfi and
-                    with the stallion Svaðilfari as the father, Loki gave birth—in the form of a mare—to the
-                    eight-legged horse Sleipnir. In addition, Loki is referred to as the father of Váli in the Prose
-                    Edda.
+                    {description}
                 </div>
+            </div>
+        )
+    }
+
+    render() {
+        const ViewCharacter = this.viewCharacter();
+        return (
+            <>
+                {ViewCharacter}
                 <div className="char__comics">Comics:</div>
                 <ul className="char__comics-list">
                     <li className="char__comics-item">
@@ -61,9 +133,9 @@ class CharInfo extends Component {
                         Avengers (1996) #1
                     </li>
                 </ul>
-            </div>
-        )
-    }
+            </>
+    )}
 }
+
 
 export default CharInfo;
