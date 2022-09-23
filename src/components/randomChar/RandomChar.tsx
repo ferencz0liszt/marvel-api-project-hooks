@@ -5,6 +5,7 @@ import mjolnir from '../../resources/img/mjolnir.png';
 import MarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errors/error";
+import ErrorBoundary from "../errorBoundaries/errorBoundary";
 
 
 interface RandomCharState {
@@ -20,10 +21,6 @@ interface RandomCharState {
 }
 
 class RandomChar extends Component<any, RandomCharState> {
-    constructor(props: any) {
-        super(props);
-        this.updateCharacter();
-    }
 
     state = {
         character: {
@@ -38,6 +35,10 @@ class RandomChar extends Component<any, RandomCharState> {
     }
 
     MarvelService = new MarvelService();
+
+    componentDidMount() {
+        this.updateCharacter();
+    }
 
     onCharacterLoad = (character: any) => {
         if (character.description === '') {
@@ -111,25 +112,27 @@ const View: FC<ViewProps> = ({character}) => {
         : <img src={thumbnail} alt="Random character" className="randomchar__img"/>;
 
     return(
-        <div className="randomchar__block">
-            {img}
-            <div className="randomchar__info">
-                <p className="randomchar__name">
-                    {name}
-                </p>
-                <p className="randomchar__descr">
-                    {description}
-                </p>
-                <div className="randomchar__btns">
-                    <a href={homepage} className="button button__main">
-                        <div className="inner">homepage</div>
-                    </a>
-                    <a href={wiki} className="button button__secondary">
-                        <div className="inner">Wiki</div>
-                    </a>
+        <ErrorBoundary>
+            <div className="randomchar__block">
+                {img}
+                <div className="randomchar__info">
+                    <p className="randomchar__name">
+                        {name}
+                    </p>
+                    <p className="randomchar__descr">
+                        {description}
+                    </p>
+                    <div className="randomchar__btns">
+                        <a href={homepage} className="button button__main">
+                            <div className="inner">homepage</div>
+                        </a>
+                        <a href={wiki} className="button button__secondary">
+                            <div className="inner">Wiki</div>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        </ErrorBoundary>
     )
 }
 
