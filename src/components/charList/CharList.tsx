@@ -1,5 +1,5 @@
 import './charList.scss';
-import {Component} from "react";
+import {Component } from "react";
 
 import MarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner";
@@ -25,11 +25,17 @@ class CharList extends Component<CharListProps, CharListState> {
         error: false,
         loading: true,
         loadingMore: false,
-        offset: 1600,
+        offset: 310,
         charactersEnded: false,
     }
 
     MarvelService = new MarvelService();
+
+    itemRefs: any = [];
+
+    setRef = (ref: any) => {
+        this.itemRefs.push(ref);
+    }
 
     onError = () => {
         this.setState({
@@ -58,6 +64,12 @@ class CharList extends Component<CharListProps, CharListState> {
         this.setState({loadingMore: true})
     }
 
+    focusOnItem = (index: number) => {
+        this.itemRefs.forEach((item: any) => item.classList.remove('char__item_selected'));
+        this.itemRefs[index].classList.add('char__item_selected');
+        this.itemRefs[index].focus();
+    }
+
     componentDidMount() {
         this.MarvelService
             .getAllCharacters()
@@ -75,23 +87,30 @@ class CharList extends Component<CharListProps, CharListState> {
 
     itemView = () => {
         const { onSelect } = this.props;
-        const items = this.state.characters.map((item) => {
-        const { name, thumbnail, id } = item;
 
-        const img = (thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg")
-            ? <img src={thumbnail} style={{objectFit: "contain"}} alt={name} className="randomchar__img"/>
-            : <img src={thumbnail} alt={name} className="randomchar__img"/>;
+        const items = this.state.characters.map((item, index) => {
+            const { name, thumbnail, id } = item;
 
-        return(
-                <li className="char__item"
-                    key={id}
-                    onClick={() => onSelect(id)}
-                >
-                    {img}
-                    <div className="char__name">{name}</div>
-                </li>
-        )
+            const img = (thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg")
+                ? <img src={thumbnail} style={{objectFit: "contain"}} alt={name} className="randomchar__img"/>
+                : <img src={thumbnail} alt={name} className="randomchar__img"/>;
+
+            return(
+                    <li className="char__item"
+                        key={id}
+                        tabIndex={0}
+                        ref={this.setRef}
+                        onClick={() => {
+                            onSelect(id);
+                            this.focusOnItem(index);
+                        }}
+                    >
+                        {img}
+                        <div className="char__name">{name}</div>
+                    </li>
+            )
         });
+
         return(
             <ul className="char__grid">
                 {items}

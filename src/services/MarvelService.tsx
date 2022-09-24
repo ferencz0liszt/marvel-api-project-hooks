@@ -1,7 +1,7 @@
 class MarvelService {
     _apiBase = 'https://gateway.marvel.com:443/v1/public/';
     _apiKey = 'apikey=2bd0b149ee4a69238b62969f2594fc44';
-    _baseOffset = 210;
+    _baseOffset = 340;
     _baseLimit = 9;
 
     // 2bd0b149ee4a69238b62969f2594fc44 - chrome
