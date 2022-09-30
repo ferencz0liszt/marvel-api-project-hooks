@@ -1,46 +1,39 @@
 import './randomChar.scss';
-import {Component, FC} from "react";
+import {Component, FC, useEffect, useState} from "react";
 
 import mjolnir from '../../resources/img/mjolnir.png';
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errors/error";
 import ErrorBoundary from "../errorBoundaries/errorBoundary";
 
 
-interface RandomCharState {
-    character: {
-        name: string | undefined
-        description: string | undefined,
-        thumbnail: string | undefined,
-        homepage: string | undefined,
-        wiki: string | undefined,
-    },
-    loading: boolean,
-    error: boolean,
+interface characterState {
+    name: string | undefined,
+    description: string | undefined,
+    thumbnail: string | undefined,
+    homepage: string | undefined,
+    wiki: string | undefined,
 }
 
-class RandomChar extends Component<any, RandomCharState> {
+const RandomChar: FC = (props) => {
 
-    state = {
-        character: {
-            name: undefined,
-            description: undefined,
-            thumbnail: undefined,
-            homepage: undefined,
-            wiki: undefined,
-        },
-        loading: true,
-        error: false,
-    }
+    const [ character, setCharacter ] = useState<characterState>({
+        description: undefined,
+        homepage: undefined,
+        name: undefined,
+        thumbnail: undefined,
+        wiki: undefined
+    });
 
-    MarvelService = new MarvelService();
+    const MarvelService = useMarvelService();
+    const { loading, error } = MarvelService;
 
-    componentDidMount() {
-        this.updateCharacter();
-    }
+    useEffect(() => {
+        updateCharacter();
+    }, [])
 
-    onCharacterLoad = (character: any) => {
+    const onCharacterLoad = (character: any) => {
         if (character.description === '') {
             character.description = "This character haven't got a description yet."
         } else if (character.description.length >= 160) {
@@ -49,14 +42,14 @@ class RandomChar extends Component<any, RandomCharState> {
         this.setState({character, loading: false});
     }
 
-    onError = () => {
+    const onError = () => {
         this.setState({
             loading: false,
             error: true
         })
     }
 
-    updateCharacter: any = () => {
+    const updateCharacter: any = () => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
         this.MarvelService
             .getCharacter(id)
@@ -64,42 +57,39 @@ class RandomChar extends Component<any, RandomCharState> {
             .catch(this.onError);
     }
 
-    newRandomCharacter = () => {
+    const newRandomCharacter = () => {
         this.setState({error: false, loading: true});
         this.updateCharacter();
     }
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = !(loading || error) ? <View character={character}/> : null;
 
-    render() {
-        const { character, loading, error} = this.state;
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !(loading || error) ? <View character={character}/> : null;
-
-        return (
-            <div className="randomchar">
-                {errorMessage}
-                {spinner}
-                {content}
-                <div className="randomchar__static">
-                    <p className="randomchar__title">
-                        Random character for today!<br/>
-                        Do you want to get to know him better?
-                    </p>
-                    <p className="randomchar__title">
-                        Or choose another one
-                    </p>
-                    <button
-                        className="button button__main"
-                        onClick={() => this.newRandomCharacter()}
-                    >
-                        <div className="inner">try it</div>
-                    </button>
-                    <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
-                </div>
+    return (
+        <div className="randomchar">
+            {errorMessage}
+            {spinner}
+            {content}
+            <div className="randomchar__static">
+                <p className="randomchar__title">
+                    Random character for today!<br/>
+                    Do you want to get to know him better?
+                </p>
+                <p className="randomchar__title">
+                    Or choose another one
+                </p>
+                <button
+                    className="button button__main"
+                    onClick={() => newRandomCharacter()}
+                >
+                    <div className="inner">try it</div>
+                </button>
+                <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
             </div>
-        )
-    }
+        </div>
+    )
 }
+
 
 interface ViewProps {
     character: any;
