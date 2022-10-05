@@ -1,5 +1,5 @@
 import './randomChar.scss';
-import {Component, FC, useEffect, useState} from "react";
+import { FC, useEffect, useState} from "react";
 
 import mjolnir from '../../resources/img/mjolnir.png';
 import useMarvelService from "../../services/MarvelService";
@@ -16,7 +16,7 @@ interface characterState {
     wiki: string | undefined,
 }
 
-const RandomChar: FC = (props) => {
+const RandomChar: FC = () => {
 
     const [ character, setCharacter ] = useState<characterState>({
         description: undefined,
@@ -26,8 +26,7 @@ const RandomChar: FC = (props) => {
         wiki: undefined
     });
 
-    const MarvelService = useMarvelService();
-    const { loading, error } = MarvelService;
+    const { loading, error, getCharacter, clearError } = useMarvelService();
 
     useEffect(() => {
         updateCharacter();
@@ -39,28 +38,20 @@ const RandomChar: FC = (props) => {
         } else if (character.description.length >= 160) {
             character.description = character.description.slice(0, 159) + '...';
         }
-        this.setState({character, loading: false});
-    }
-
-    const onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
+        setCharacter(character);
     }
 
     const updateCharacter: any = () => {
+        clearError();
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
-        this.MarvelService
-            .getCharacter(id)
-            .then(this.onCharacterLoad)
-            .catch(this.onError);
+        getCharacter(id)
+            .then(onCharacterLoad)
     }
 
     const newRandomCharacter = () => {
-        this.setState({error: false, loading: true});
-        this.updateCharacter();
+        updateCharacter();
     }
+
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading ? <Spinner/> : null;
     const content = !(loading || error) ? <View character={character}/> : null;
@@ -90,12 +81,7 @@ const RandomChar: FC = (props) => {
     )
 }
 
-
-interface ViewProps {
-    character: any;
-}
-
-const View: FC<ViewProps> = ({character}) => {
+const View: FC<any> = ({character}) => {
     const { name, description, thumbnail, homepage, wiki } = character;
     const img = (thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg")
         ? <img src={thumbnail} style={{objectFit: "contain"}} alt="Random character" className="randomchar__img"/>

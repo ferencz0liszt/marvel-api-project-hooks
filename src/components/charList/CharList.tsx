@@ -12,28 +12,20 @@ interface CharListProps {
 
 const CharList: FC<CharListProps> = (props) => {
     const [characters, setCharacters] = useState<any[]>([]);
-    const [error, setError] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(true);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [offset, setOffset] = useState<number>(310);
     const [charactersEnded, setCharactersEnded] = useState<boolean>(false);
 
-    const marvelService = useMarvelService();
+    const { loading, error, getAllCharacters } = useMarvelService();
 
     useEffect(() => {
-        onUse(offset);
+        onUse(offset, false);
     }, []);
 
-    const onUse = (offset: number) => {
-        onLoadingMore();
-        marvelService
-            .getAllCharacters(offset)
+    const onUse = (offset: number, initial: boolean) => {
+        initial ? setLoadingMore(true) : setLoadingMore(false)
+        getAllCharacters(offset)
             .then(onCharactersLoad)
-            .catch(onError);
-    }
-
-    const onLoadingMore = () => {
-        setLoadingMore(true);
     }
 
     const onCharactersLoad = (newCharacters: any[]) => {
@@ -41,15 +33,9 @@ const CharList: FC<CharListProps> = (props) => {
         if (newCharacters.length < 9) {ended = true;}
 
         setCharacters((characters) => [...characters, ...newCharacters]);
-        setLoading( false);
         setLoadingMore( false);
         setOffset((offset) => offset + 9);
         setCharactersEnded(ended);
-    }
-
-    const onError = () => {
-        setError(true);
-        setLoading(false);
     }
 
     const itemRefs = useRef<any>([]);
@@ -58,14 +44,6 @@ const CharList: FC<CharListProps> = (props) => {
         itemRefs.current.forEach((item: any) => item.classList.remove('char__item_selected'));
         itemRefs.current[index].classList.add('char__item_selected');
         itemRefs.current[index].focus();
-    }
-
-    const loadMore = (offset: number) => {
-        onLoadingMore();
-        marvelService
-            .getAllCharacters(offset)
-            .then(onCharactersLoad)
-            .catch(onError);
     }
 
     const itemView = (charactersList: any[]) => {
@@ -103,14 +81,14 @@ const CharList: FC<CharListProps> = (props) => {
 
     return (
         <div className="char__list">
-            {!(loading || error) ? items : null}
-            {(loading) ? <Spinner/> : null}
+            {items}
+            {(loading || loadingMore) ? <Spinner/> : null}
             {(error) ? <ErrorMessage/> : null}
             <button
                 className="button button__main button__long"
                 disabled={loadingMore}
                 style={(charactersEnded) ? {display: "none"} : {display: "block"}}
-                onClick={() => loadMore(offset)}
+                onClick={() => onUse(offset, true)}
             >
                 <div className="inner">load more</div>
             </button>
