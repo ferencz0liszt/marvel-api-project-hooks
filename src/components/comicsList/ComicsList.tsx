@@ -4,6 +4,7 @@ import {FC, useEffect, useState} from "react";
 import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import Error from "../errors/error";
+import {Link} from "react-router-dom";
 
 const ComicsList: FC = () => {
 
@@ -27,17 +28,16 @@ const ComicsList: FC = () => {
     }
 
     const comicsView = comics.map((item) => {
-        console.log(item);
         const { title, id, thumbnail, price } = item;
         return (
             <li className="comics__item"
                 key={id}
             >
-                <a href="#">
+                <Link to={`/comics/${id}`}>
                     <img src={thumbnail} alt="title" className="comics__item-img"/>
                     <div className="comics__item-name">{title}</div>
                     <div className="comics__item-price">{price}</div>
-                </a>
+                </Link>
             </li>
         )
     });

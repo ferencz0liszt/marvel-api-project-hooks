@@ -18,7 +18,6 @@ const MainPage = () => {
                 <CharInfo selectedId={selectedId}/>
             </div>
             <img className="bg-decoration" src={decoration} alt="vision"/>
-            eslint-disable-next-line react/jsx-no-undef
         </>
 
     )
